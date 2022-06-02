@@ -1,0 +1,68 @@
+Semantics=SingleAssignment;
+
+Agent Environment
+	Vars:
+		goal_1_reached: boolean;
+		rendezvous: boolean;
+		goal_2_reached: boolean;
+	end Vars
+	Actions = { };
+	Protocol:
+	end Protocol
+	Evolution:
+		goal_1_reached=true	if ( Agent0.Action = goal_1 and Agent1.Action = goal_2 );
+		rendezvous=true	if ( Agent0.Action = rendezvous and Agent1.Action = rendezvous );
+		goal_2_reached=true	if ( Agent0.Action = goal_1 and Agent1.Action = goal_2 );
+	end Evolution
+end Agent
+
+Agent Agent0
+	Lobsvars = { goal_1_reached, rendezvous };
+	Vars:
+		agent_dummy: boolean;
+	end Vars
+	Actions = { rendezvous, goal_1 };
+	Protocol:
+		Environment.rendezvous = false:	{ rendezvous };
+		Environment.rendezvous = true:	{ goal_1 };
+	end Protocol
+	Evolution:
+		agent_dummy = true	if agent_dummy = true;
+		agent_dummy = false	if agent_dummy = false;
+	end Evolution
+end Agent
+
+Agent Agent1
+	Lobsvars = { rendezvous, goal_2_reached };
+	Vars:
+		agent_dummy: boolean;
+	end Vars
+	Actions = { rendezvous, goal_2 };
+	Protocol:
+		Environment.rendezvous = false:	{ rendezvous };
+		Environment.rendezvous = true:	{ goal_2 };
+	end Protocol
+	Evolution:
+		agent_dummy = true	if agent_dummy = true;
+		agent_dummy = false	if agent_dummy = false;
+	end Evolution
+end Agent
+
+Evaluation
+	goal_1_reached if Environment.goal_1_reached = true;
+	goal_2_reached if Environment.goal_2_reached = true;
+end Evaluation
+
+InitStates
+	Environment.goal_1_reached = false and Environment.rendezvous = false and Environment.goal_2_reached = false and
+	Agent0.agent_dummy = false and
+	Agent1.agent_dummy = false;
+end InitStates
+
+Groups
+	gA = { Agent0, Agent1 };
+end Groups
+
+Formulae
+	<gA> F ( goal_1_reached and goal_2_reached ) ;
+end Formulae

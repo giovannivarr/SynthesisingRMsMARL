@@ -1,0 +1,20 @@
+::rendezvous
+~rendezvous
+rendezvous
+2
+::goal_1
+rendezvous
+goal_1_reached
+1
+::goal_2
+rendezvous
+goal_2_reached
+1
+=====
+rendezvous,goal_1
+rendezvous,goal_2
+=====
+F ( goal_1_reached and goal_2_reached )
+=====
+
+

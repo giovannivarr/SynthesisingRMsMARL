@@ -1,0 +1,88 @@
+Semantics=SingleAssignment;
+
+Agent Environment
+	Vars:
+		goal_reached: boolean;
+		green_pressed: boolean;
+		red_pressed: boolean;
+		yellow_pressed: boolean;
+	end Vars
+	Actions = { };
+	Protocol:
+	end Protocol
+	Evolution:
+		goal_reached=true	if ( Agent0.Action = to_goal and Agent1.Action = press_green and Agent2.Action = nil ) or ( Agent0.Action = to_goal and Agent1.Action = press_red and Agent2.Action = press_red ) or ( Agent0.Action = to_goal and Agent1.Action = nil and Agent2.Action = nil ) or ( goal_reached = true and Agent0.Action = nil and Agent1.Action = nil and Agent2.Action = nil );
+		green_pressed=true	if ( Agent0.Action = press_yellow and Agent1.Action = press_green and Agent2.Action = nil ) or ( Agent0.Action = to_goal and Agent1.Action = press_green and Agent2.Action = nil ) or ( Agent0.Action = nil and Agent1.Action = press_green and Agent2.Action = nil ) or ( green_pressed = true and Agent0.Action = nil and Agent1.Action = nil and Agent2.Action = nil );
+		red_pressed=true	if ( Agent0.Action = press_yellow and Agent1.Action = press_red and Agent2.Action = press_red ) or ( Agent0.Action = to_goal and Agent1.Action = press_red and Agent2.Action = press_red ) or ( Agent0.Action = nil and Agent1.Action = press_red and Agent2.Action = press_red ) or ( red_pressed = true and Agent0.Action = nil and Agent1.Action = nil and Agent2.Action = nil );
+		yellow_pressed=true	if ( Agent0.Action = press_yellow and Agent1.Action = press_green and Agent2.Action = nil ) or ( Agent0.Action = press_yellow and Agent1.Action = press_red and Agent2.Action = press_red ) or ( Agent0.Action = press_yellow and Agent1.Action = nil and Agent2.Action = nil ) or ( yellow_pressed = true and Agent0.Action = nil and Agent1.Action = nil and Agent2.Action = nil );
+	end Evolution
+end Agent
+
+Agent Agent0
+	Lobsvars = { goal_reached, red_pressed, yellow_pressed };
+	Vars:
+		agent_dummy: boolean;
+	end Vars
+	Actions = { press_yellow, to_goal, nil };
+	Protocol:
+		Environment.yellow_pressed = false:	{ press_yellow };
+		Environment.red_pressed = true and Environment.goal_reached = false:	{ to_goal };
+		agent_dummy = true or agent_dummy = false:	{ nil };
+	end Protocol
+	Evolution:
+		agent_dummy = true	if agent_dummy = true;
+		agent_dummy = false	if agent_dummy = false;
+	end Evolution
+end Agent
+
+Agent Agent1
+	Lobsvars = { green_pressed, red_pressed, yellow_pressed };
+	Vars:
+		agent_dummy: boolean;
+	end Vars
+	Actions = { press_green, press_red, nil };
+	Protocol:
+		Environment.yellow_pressed = true and Environment.green_pressed = false:	{ press_green };
+		Environment.green_pressed = true and Environment.red_pressed = false:	{ press_red };
+		agent_dummy = true or agent_dummy = false:	{ nil };
+	end Protocol
+	Evolution:
+		agent_dummy = true	if agent_dummy = true;
+		agent_dummy = false	if agent_dummy = false;
+	end Evolution
+end Agent
+
+Agent Agent2
+	Lobsvars = { green_pressed, red_pressed };
+	Vars:
+		agent_dummy: boolean;
+	end Vars
+	Actions = { press_red, nil };
+	Protocol:
+		Environment.green_pressed = true and Environment.red_pressed = false:	{ press_red };
+		agent_dummy = true or agent_dummy = false:	{ nil };
+	end Protocol
+	Evolution:
+		agent_dummy = true	if agent_dummy = true;
+		agent_dummy = false	if agent_dummy = false;
+	end Evolution
+end Agent
+
+Evaluation
+	goal_reached if Environment.goal_reached = true;
+end Evaluation
+
+InitStates
+	Environment.goal_reached = false and Environment.green_pressed = false and Environment.red_pressed = false and Environment.yellow_pressed = false and
+	Agent0.agent_dummy = false and
+	Agent1.agent_dummy = false and
+	Agent2.agent_dummy = false;
+end InitStates
+
+Groups
+	gA = { Agent0, Agent1, Agent2 };
+end Groups
+
+Formulae
+	<gA> F ( goal_reached ) ;
+end Formulae

@@ -1,0 +1,4 @@
+0 # initial state
+(0,1,'r',0) # Agent gets go-ahead to proceed
+(1,2,'g3',1) # Agent reaches goal
+(2,2,'True',0)

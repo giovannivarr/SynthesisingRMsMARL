@@ -1,0 +1,81 @@
+Semantics=SingleAssignment;
+
+Agent Environment
+	Vars:
+		orange_pressed: boolean;
+		decoration_hit: boolean;
+		office_reached_with_coffee: boolean;
+		coffee: boolean;
+		blue_pressed: boolean;
+	end Vars
+	Actions = { };
+	Protocol:
+	end Protocol
+	Evolution:
+		orange_pressed=true	if ( Agent0.Action = grab_coffee and Agent1.Action = press_orange ) or ( Agent0.Action = to_office_with_coffee and Agent1.Action = press_orange ) or ( Agent0.Action = nil and Agent1.Action = press_orange ) or ( Agent0.Action = hit_decoration and Agent1.Action = press_orange ) or ( orange_pressed = true and Agent0.Action = nil and Agent1.Action = nil );
+		orange_pressed=false	if ( orange_pressed = false and Agent0.Action = nil and Agent1.Action = nil );
+		decoration_hit=true	if ( Agent0.Action = grab_coffee and Agent1.Action = hit_decoration ) or ( Agent0.Action = to_office_with_coffee and Agent1.Action = hit_decoration ) or ( Agent0.Action = nil and Agent1.Action = hit_decoration ) or ( Agent0.Action = hit_decoration and Agent1.Action = press_blue ) or ( Agent0.Action = hit_decoration and Agent1.Action = press_orange ) or ( Agent0.Action = hit_decoration and Agent1.Action = nil ) or ( decoration_hit = true and Agent0.Action = nil and Agent1.Action = nil );
+		decoration_hit=false	if ( decoration_hit = false and Agent0.Action = nil and Agent1.Action = nil );
+		office_reached_with_coffee=true	if ( Agent0.Action = to_office_with_coffee and Agent1.Action = press_blue ) or ( Agent0.Action = to_office_with_coffee and Agent1.Action = press_orange ) or ( Agent0.Action = to_office_with_coffee and Agent1.Action = nil ) or ( Agent0.Action = to_office_with_coffee and Agent1.Action = hit_decoration ) or ( office_reached_with_coffee = true and Agent0.Action = nil and Agent1.Action = nil );
+		office_reached_with_coffee=false	if ( office_reached_with_coffee = false and Agent0.Action = nil and Agent1.Action = nil );
+		coffee=true	if ( Agent0.Action = grab_coffee and Agent1.Action = press_blue ) or ( Agent0.Action = grab_coffee and Agent1.Action = press_orange ) or ( Agent0.Action = grab_coffee and Agent1.Action = nil ) or ( Agent0.Action = grab_coffee and Agent1.Action = hit_decoration ) or ( coffee = true and Agent0.Action = nil and Agent1.Action = nil );
+		coffee=false	if ( coffee = false and Agent0.Action = nil and Agent1.Action = nil );
+		blue_pressed=true	if ( Agent0.Action = grab_coffee and Agent1.Action = press_blue ) or ( Agent0.Action = to_office_with_coffee and Agent1.Action = press_blue ) or ( Agent0.Action = nil and Agent1.Action = press_blue ) or ( Agent0.Action = hit_decoration and Agent1.Action = press_blue ) or ( blue_pressed = true and Agent0.Action = nil and Agent1.Action = nil );
+		blue_pressed=false	if ( blue_pressed = false and Agent0.Action = nil and Agent1.Action = nil );
+	end Evolution
+end Agent
+
+Agent Agent0
+	Lobsvars = { office_reached_with_coffee, orange_pressed, coffee, decoration_hit };
+	Vars:
+		agent_dummy: boolean;
+	end Vars
+	Actions = { grab_coffee, to_office_with_coffee, nil, hit_decoration };
+	Protocol:
+		Environment.coffee = false and Environment.orange_pressed = true:	{ grab_coffee };
+		Environment.coffee = true:	{ to_office_with_coffee };
+		agent_dummy = true or agent_dummy = false:	{ nil };
+		Environment.decoration_hit = false:	{ hit_decoration };
+	end Protocol
+	Evolution:
+		agent_dummy = true	if agent_dummy = true;
+		agent_dummy = false	if agent_dummy = false;
+	end Evolution
+end Agent
+
+Agent Agent1
+	Lobsvars = { orange_pressed, blue_pressed, decoration_hit };
+	Vars:
+		agent_dummy: boolean;
+	end Vars
+	Actions = { press_blue, press_orange, nil, hit_decoration };
+	Protocol:
+		Environment.blue_pressed = false:	{ press_blue };
+		Environment.orange_pressed = false and Environment.blue_pressed = true:	{ press_orange };
+		agent_dummy = true or agent_dummy = false:	{ nil };
+		Environment.decoration_hit = false:	{ hit_decoration };
+	end Protocol
+	Evolution:
+		agent_dummy = true	if agent_dummy = true;
+		agent_dummy = false	if agent_dummy = false;
+	end Evolution
+end Agent
+
+Evaluation
+	decoration_hit if Environment.decoration_hit = true;
+	office_reached_with_coffee if Environment.office_reached_with_coffee = true;
+end Evaluation
+
+InitStates
+	Environment.orange_pressed = false and Environment.decoration_hit = false and Environment.office_reached_with_coffee = false and Environment.coffee = false and Environment.blue_pressed = false and
+	Agent0.agent_dummy = false and
+	Agent1.agent_dummy = false;
+end InitStates
+
+Groups
+	gA = { Agent0, Agent1 };
+end Groups
+
+Formulae
+	<gA> ( !decoration_hit U ( office_reached_with_coffee ) ) ;
+end Formulae

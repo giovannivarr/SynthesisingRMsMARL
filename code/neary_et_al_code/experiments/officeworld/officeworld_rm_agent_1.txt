@@ -1,0 +1,9 @@
+0 # initial state
+(0, 1, 'bob', 0) # Blue and orange button are pressed
+(1, 2, 'c', 0) # Agent has picked coffee up
+(2, 3, 'o', 1) # Agent has reached office with coffee
+(3, 3, 'True', 0) # State 3 is an absorbing state
+(2, 4, 'd', 0) # Agent has stepped on decoration
+(0, 4, 'd', 0) # Agent has stepped on decoration
+(1, 4, 'd', 0) # Agent has stepped on decoration
+(4, 4, 'True', 0) # State 4 is an absorbing state

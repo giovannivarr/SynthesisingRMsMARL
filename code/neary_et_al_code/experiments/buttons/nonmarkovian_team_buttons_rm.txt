@@ -1,0 +1,15 @@
+0 # initial state 
+(0, 1, 'by1', 0) # Yellow button is pressed once
+(1, 2, 'by', 0) # Yellow button is pressed twice
+(2, 3, 'bg', 0) # Green button is pressed
+(3, 4, 'a2br', 0) # Agent 2 on red button
+(3, 5, 'a3br', 0) # Agent 3 on red button
+(4, 6, 'a3br', 0) # Agent 3 on red button
+(4, 3, 'a2lr', 0) # Agent 2 left red button
+(5, 6, 'a2br', 0) # Agent 2 on red button
+(5, 3, 'a3lr', 0) # Agent 3 left red button
+(6, 4, 'a3lr', 0) # Agent 3 left red button
+(6, 5, 'a2lr', 0) # Agent 2 left red button
+(6, 7, 'br', 0) # Red button has been pressed
+(7, 8, 'g', 1) # Agent 1 reaches goal destination
+(8, 8, 'True', 0) # 8 is a terminating state

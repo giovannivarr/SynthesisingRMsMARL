@@ -1,0 +1,4 @@
+0 # initial state
+(0,1,'r',0) # Agents have successfully completed rendezvous
+(1,2,'g1,g2',1) # Agents have reached their goals
+(2,2,'True',0)
