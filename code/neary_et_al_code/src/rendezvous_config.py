@@ -49,7 +49,7 @@ def rendezvous_config(num_times, num_agents, strategy_rm=False, invariant_experi
     # configuration of learning params
     learning_params = LearningParameters()
     learning_params.gamma = 0.9
-    learning_params.alpha = 0.8
+    learning_params.alpha = 0.5 # 0.8
     learning_params.T = 50
     learning_params.initial_epsilon = 0.0 # Set epsilon to zero to turn off epsilon-greedy exploration (only using boltzmann)
     learning_params.tabular_case = True

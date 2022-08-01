@@ -515,7 +515,7 @@ class ButtonsEnv:
         last_action = a_
         return s_next, last_action
 
-    def strategy_environment_step(self, s, a, option=None):
+    def hrm_environment_step(self, s, a, option=None):
         """
         Execute action a from state s. If option_training is True it means we are training option, and thus do not
         need to consider agent-based transitions.
@@ -548,7 +548,6 @@ class ButtonsEnv:
 
         if option == 'bg' and 'by' in l and not self.yellow_button_pushed:
             self.unlock_wall('yellow')
-        #elif option == 'br' and 'bg' in l and not self.green_button_pushed:
         elif option == 'a3br' and 'bg' in l and not self.green_button_pushed:
             self.unlock_wall('green')
         elif option == 'g' and 'br' in l and not self.red_button_pushed:
@@ -560,6 +559,39 @@ class ButtonsEnv:
             r = 1
 
         return r, l, s_next
+
+    def counterfactual_hrm_environment_step(self, s, s_new, option=None):
+        """
+        Used to perform counterfactual updates during training.
+
+        Parameters
+        ----------
+        s : int
+            Index representing the current environment state.
+        a : int
+            Index representing the action being taken.
+        option_training : bool
+            Bool representing whether we are training an option or not.
+        option : str
+            Name of the trained option, if we are training one.
+
+        Returns
+        -------
+        r : int
+            Reward achieved by taking action a from state s.
+        l : list
+            List of events occurring at this step.
+        s_next : int
+            Index of next state.
+        """
+        l = self.get_strategy_label(s, s_new, option)
+        r = 0
+
+        if (option == 'a2br' or option == 'a3br') and 'br' in l:
+            r = 1
+        elif option and option in l:
+            r = 1
+        return r
 
 def play():
     agent_id = 2

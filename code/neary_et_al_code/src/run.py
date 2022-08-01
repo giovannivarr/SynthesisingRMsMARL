@@ -17,11 +17,12 @@ if __name__ == "__main__":
 
     #experiment = 'buttons'
     #experiment = 'ihrl_buttons'
-    experiment = 'strategy_buttons'
+    #experiment = 'strategy_buttons'
+    #experiment = 'counterfactual_buttons'
     #experiment = 'iql_buttons'
 
     #experiment = 'officeworld'
-    #experiment = 'strategy_officeworld'
+    experiment = 'strategy_officeworld'
 
     if experiment == 'rendezvous':
         from rendezvous_config import rendezvous_config
@@ -81,6 +82,13 @@ if __name__ == "__main__":
         tester = buttons_config(num_times, num_agents, strategy_rm=True)
         run_strategy_experiment(tester, num_agents, num_times, show_print=True)
 
+    if experiment == 'counterfactual_buttons':
+        from buttons_config import buttons_config
+        from experiments.run_strategy_experiment import run_strategy_experiment
+        num_agents = 3  # Num agents must be 3 for this example
+        tester = buttons_config(num_times, num_agents, strategy_rm=True)
+        run_strategy_experiment(tester, num_agents, num_times, show_print=True, counterfactual_experiment=True)
+
     if experiment == 'iql_buttons':
         from buttons_config import buttons_config
         from experiments.iql import run_iql_experiment
@@ -100,7 +108,7 @@ if __name__ == "__main__":
         #tester = officeworld_config(1)
         tester = officeworld_config(num_times)
         #run_strategy_experiment(tester, 2, 1)
-        run_strategy_experiment(tester, 2, num_times)
+        run_strategy_experiment(tester, 2, num_times, counterfactual_experiment=True)
 
 
     # Save the results

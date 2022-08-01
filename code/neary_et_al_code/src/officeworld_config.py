@@ -32,8 +32,8 @@ def officeworld_config(num_times):
 
     # configuration of learning params
     learning_params = LearningParameters()
-    learning_params.gamma = 0.99  # 0.9
-    learning_params.alpha = 0.8 # 0.8
+    learning_params.gamma = 0.9  # 0.9
+    learning_params.alpha = 0.5  # 0.8
     learning_params.T = 50
     learning_params.initial_epsilon = 0.0  # Set epsilon to zero to turn off epsilon-greedy exploration (only using boltzmann)
     learning_params.max_timesteps_per_task = testing_params.num_steps
@@ -78,7 +78,7 @@ def officeworld_config(num_times):
     #                                    (6, 11),
     #                                    (7, 11), (7, 12), (7, 13), (7, 14)]
     env_settings['office'] = (5, 5)
-    env_settings['coffee'] = (4,13)
+    env_settings['coffee'] = (4, 13)
     '''
     env_settings['Nr'] = 7
     env_settings['Nc'] = 7

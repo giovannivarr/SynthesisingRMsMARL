@@ -10,7 +10,7 @@ class StrategyAgent:
     which are updated across training episodes.
     """
 
-    def __init__(self, rm_file, options_list, actions, s_i, num_states, agent_id):
+    def __init__(self, rm_file, options_list, actions, s_i, num_states, agent_id, counterfactual_training=True):
         """
         Initialize agent object.
 
@@ -37,6 +37,7 @@ class StrategyAgent:
         #self.last_s = self.s
         self.actions = actions
         self.num_states = num_states
+        self.counterfactual_training = counterfactual_training
 
         self.rm = SparseRewardMachine(self.rm_file)
         self.u_i = self.rm.get_initial_state()
@@ -134,6 +135,10 @@ class StrategyAgent:
                 if randn >= pr_select[a] and randn <= pr_select[a + 1]:
                     a_selected = a
                     break
+            '''
+
+            best_actions = np.where(self.q[self.s, self.u, :] == np.max(self.q[self.s, self.u, :]))[0]
+            a_selected = random.choice(best_actions)'''
 
         a = a_selected
 

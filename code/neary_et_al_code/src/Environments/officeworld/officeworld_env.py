@@ -422,7 +422,7 @@ class OfficeWorldEnv:
         last_action = a_
         return s_next, last_action
 
-    def strategy_environment_step(self, s, a, option=None):
+    def hrm_environment_step(self, s, a, option=None):
         """
         Execute action a from state s. If option_training is True it means we are training option, and thus do not
         need to consider agent-based transitions.
@@ -453,7 +453,8 @@ class OfficeWorldEnv:
         l = self.get_strategy_training_mdp_label(s, s_next, option)
         r = 0
 
-        if option == 'c' and 'bob' in l and not self.blue_button_pushed and self.orange_button_pushed:
+        #if option == 'c' and 'bob' in l and not self.blue_button_pushed and self.orange_button_pushed:
+        if option == 'c':
             self.unlock_wall()
 
         if option and option in l:
@@ -462,6 +463,34 @@ class OfficeWorldEnv:
             r = -1
 
         return r, l, s_next
+
+    def counterfactual_hrm_environment_step(self, s, s_new, option):
+        """
+        Used to perform counterfactual updates during training.
+
+        Parameters
+        ----------
+        s : int
+            Index representing the current environment state.
+        s_new : int
+            Index representing the next environment state.
+        option : str
+            Name of the counterfactual option.
+
+        Returns
+        -------
+        r : int
+            Reward achieved by taking action a from state s.
+        """
+        l = self.get_strategy_training_mdp_label(s, s_new, option)
+        r = 0
+
+        if option and option in l:
+            r = 1
+        elif 'd' in l:  # punish agent if it hits a decoration
+            r = -1
+
+        return r
 
     def show(self, s):
         """

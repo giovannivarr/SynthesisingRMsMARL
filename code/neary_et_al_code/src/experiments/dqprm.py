@@ -74,19 +74,20 @@ def run_qlearning_task(epsilon,
                 # a = training_environments[i].get_last_action() # due to MDP slip
                 agent_list[i].update_agent(s_new, a, r, l, learning_params)
 
-                for u in agent_list[i].rm.U:
-                    if not (u == current_u) and not (u in agent_list[i].rm.T):
-                        l = training_environments[i].get_mdp_label(s, s_new, u)
-                        r = 0
-                        u_temp = u
-                        u2 = u
-                        for e in l:
-                            # Get the new reward machine state and the reward of this step
-                            u2 = agent_list[i].rm.get_next_state(u_temp, e)
-                            r = r + agent_list[i].rm.get_reward(u_temp, u2)
-                            # Update the reward machine state
-                            u_temp = u2
-                        agent_list[i].update_q_function(s, s_new, u, u2, a, r, learning_params)
+                if agent_list[i].counterfactual_training:
+                    for u in agent_list[i].rm.U:
+                        if not (u == current_u) and not (u in agent_list[i].rm.T):
+                            l = training_environments[i].get_mdp_label(s, s_new, u)
+                            r = 0
+                            u_temp = u
+                            u2 = u
+                            for e in l:
+                                # Get the new reward machine state and the reward of this step
+                                u2 = agent_list[i].rm.get_next_state(u_temp, e)
+                                r = r + agent_list[i].rm.get_reward(u_temp, u2)
+                                # Update the reward machine state
+                                u_temp = u2
+                            agent_list[i].update_q_function(s, s_new, u, u2, a, r, learning_params)
 
         # If enough steps have elapsed, test and save the performance of the agents.
         if testing_params.test and tester.get_current_step() % testing_params.test_freq == 0:
@@ -271,6 +272,7 @@ def run_multi_agent_experiment(tester,
                             num_agents,
                             num_times,
                             nonmarkovian=False,
+                            counterfactual_training=True,
                             show_print=True):
     """
     Run the entire q-learning with reward machines experiment a number of times specified by num_times.
@@ -284,6 +286,10 @@ def run_multi_agent_experiment(tester,
         Number of agents in this experiment.
     num_times : int
         Number of times to run the entire experiment (restarting training from scratch).
+    nonmarkovian : bool
+        Flag indicating whether or not to use nonmarkovian design in buttons task.
+    counterfactual_training : bool
+        Flag indicating whether or not the agents are trained using counterfactual samples.
     show_print : bool
         Flag indicating whether or not to output text to the terminal.
     """
@@ -317,7 +323,8 @@ def run_multi_agent_experiment(tester,
         for i in range(num_agents):
             actions = testing_env.get_actions(i)
             s_i = testing_env.get_initial_state(i)
-            agent_list.append(Agent(rm_learning_file_list[i], s_i, num_states, actions, i))
+            agent_list.append(Agent(rm_learning_file_list[i], s_i, num_states, actions, i,
+                                    counterfactual_training=counterfactual_training))
 
         num_episodes = 0
         step = 0

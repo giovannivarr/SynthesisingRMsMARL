@@ -317,7 +317,7 @@ class GridWorldEnv:
 
         return l
 
-    def strategy_environment_step(self, s, a, option=None):
+    def hrm_environment_step(self, s, a, option=None):
         """
         Execute action a from state s. If option_training is True it means we are training option, and thus do not
         need to consider agent-based transitions.
@@ -364,6 +364,49 @@ class GridWorldEnv:
                 r = 1
 
         return r, l, s_next
+
+    def counterfactual_hrm_environment_step(self, s, s_new, option=None):
+        """
+        Used to perform counterfactual updates during training.
+
+        Parameters
+        ----------
+        s : int
+            Index representing the current environment state.
+        a : int
+            Index representing the action being taken.
+        option_training : bool
+            Bool representing whether we are training an option or not.
+        option : str
+            Name of the trained option, if we are training one.
+
+        Returns
+        -------
+        r : int
+            Reward achieved by taking action a from state s.
+        l : list
+            List of events occurring at this step.
+        s_next : int
+            Index of next state.
+        """
+        l = self.get_train_strategy_label(s, s_new, option)
+        r = 0
+
+        if self.agent_id == 3 and self.invariant_experiment:
+            if l == ['charged']:
+                r = 1
+            elif l == ['discharged']:
+                r = 0
+        else:
+            if option == 'r{}'.format(self.agent_id) and 'r' in l:
+                r = 1
+                if self.invariant_experiment:
+                    if not self.system_recharged:
+                        l = ['discharged']
+                        r = 0
+            elif option and option in l:
+                r = 1
+        return r
 
     ######################### TROUBLESHOOTING METHODS ################################
 

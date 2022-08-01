@@ -16,7 +16,7 @@ class Agent:
     state when starting a new episode by calling self.initialize_world() and 
     self.initialize_reward_machine().
     """
-    def __init__(self, rm_file, s_i, num_states, actions, agent_id):
+    def __init__(self, rm_file, s_i, num_states, actions, agent_id, counterfactual_training=True):
         """
         Initialize agent object.
 
@@ -37,6 +37,7 @@ class Agent:
         self.s = s_i
         self.actions = actions
         self.num_states = num_states
+        self.counterfactual_training = counterfactual_training
 
         self.rm = SparseRewardMachine(self.rm_file)
         self.u = self.rm.get_initial_state()

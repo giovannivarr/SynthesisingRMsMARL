@@ -112,11 +112,11 @@ def get_option_starting_position(option, task, i=None):
 
     elif task == 'officeworld':
         if option == 'c':
-            #row, col = 0, 14
-            row, col = 2, 0
+            row, col = 0, 14
+            #row, col = 2, 0
         elif option == 'o':
-            #row, col = 4, 13
-            row, col = 6, 2
+            row, col = 4, 13
+            #row, col = 6, 2
 
         elif option == 'bb':
             row, col = 0, 2
@@ -215,18 +215,26 @@ def run_strategy_training(epsilon,
             # print(training_agent.current_option)
             if not training_agent.option_complete:
                 s, a = training_agent.get_next_action(epsilon, learning_params)
-
-                r, l, s_new = training_environments[i].strategy_environment_step(s, a,
-                                                                                 option=training_agent.current_option)
+                r, l, s_new = training_environments[i].hrm_environment_step(s, a,
+                                                                            option=training_agent.current_option)
                 training_agent.update_agent(s_new, r, a, learning_params)
-
-                #if training_agent.agent_id == 1 and training_agent.current_option == 'o' and r == 1:
-                #    print(s, a, s_new, l, r, training_environments[i].show(s_new))
+                #if r == -1 and training_agent.agent_id == 1:
+                #    print(training_agent.option_q_dict[training_agent.current_option])
+                if training_agent.counterfactual_training:
+                    for counterfactual_option in training_agent.option_q_dict.keys():
+                        if counterfactual_option == training_agent.current_option:
+                            continue
+                        counterfactual_r = training_environments[i].counterfactual_hrm_environment_step(s, s_new,
+                                                                                         option=counterfactual_option)
+                        #print(counterfactual_option, training_agent.current_option)
+                        training_agent.update_q_function(s, s_new, a, counterfactual_option,
+                                                         counterfactual_r, learning_params)
 
                 if r != 0 or (invariant_experiment and l == ['r,discharged']) or (tester.experiment == 'officeworld' and
                                                                                   'd' in l):
                     training_agent.option_complete = True
-                    #print('Option ' + training_agent.current_option + ' completed in {} steps'.format(steps_counter[i]) +
+                    #if i == 0:
+                    #    print('Option ' + training_agent.current_option + ' completed in {} steps'.format(steps_counter[i]) +
                     #      ' with a reward of {}'.format(r))
                     steps_counter[i] = 0
 
@@ -238,11 +246,9 @@ def run_strategy_training(epsilon,
 
         # If enough steps have elapsed, test and save the performance of the agents.
         if testing_params.test and tester.get_current_step() % testing_params.test_freq == 0:
-            for training_agent in training_agent_list:
-                option = training_agent.current_option
-                for j in range(len(agent_list)):
-                    if option in agent_list[j].get_options_list():
-                        agent_list[j].option_q_dict[option] = training_agent.option_q_dict[option][:]
+            for agent, training_agent in zip(agent_list, training_agent_list):
+                for option in training_agent.option_q_dict.keys():
+                    agent.option_q_dict[option] = training_agent.option_q_dict[option][:]
 
             t_init = time.time()
             step = tester.get_current_step()
@@ -352,6 +358,8 @@ def run_strategy_test(agent_list,
         agent_list[i].initialize_reward_machine()
         agent_id = i
         agent_list[i].current_option = testing_env.get_next_agent_option(agent_id, agent_list[i].u)
+        #if i == 0:
+            #print([agent_list[i].option_q_dict[option] for option in agent_list[i].option_q_dict.keys()])
 
     s_team = np.full(num_agents, -1, dtype=int)
     for i in range(num_agents):
@@ -362,11 +370,9 @@ def run_strategy_test(agent_list,
         u_team[i] = agent_list[i].u
     testing_reward = 0
 
-    step = 0
-
     # Starting interaction with the environment
     for t in range(testing_params.num_steps):
-        step = step + 1
+        step += 1
 
         # Perform a team step
         for i in range(num_agents):
@@ -422,6 +428,7 @@ def run_strategy_experiment(tester,
                             num_agents,
                             num_times,
                             invariant_experiment=False,
+                            counterfactual_experiment=False,
                             show_print=True):
     """
     Run the entire q-learning with reward machines experiment a number of times specified by num_times.
@@ -441,13 +448,10 @@ def run_strategy_experiment(tester,
 
     learning_params = tester.learning_params
 
-    global_steps_counter = [0]
-
     for t in range(num_times):
         # Resetting default step values
         tester.restart()
 
-        rm_test_file = tester.rm_test_file
         rm_learning_file_list = tester.rm_learning_file_list
 
         # Verify that the number of local reward machines matches the number of agents in the experiment.
@@ -458,13 +462,9 @@ def run_strategy_experiment(tester,
             testing_env = MultiAgentGridWorldEnv(tester.rm_test_file, num_agents, tester.env_settings, strategy_rm=True,
                                                  invariant_experiment=invariant_experiment)
             num_states = testing_env.num_states
-            options = ['r{}'.format(i + 1) for i in range(num_agents)] + \
-                      ['g{}'.format(i + 1) for i in range(num_agents)]
         elif tester.experiment == 'buttons':
             testing_env = MultiAgentButtonsEnv(tester.rm_test_file, num_agents, tester.env_settings, strategy_rm=True)
             num_states = testing_env.num_states
-            options = ['by', 'bg', 'a2br', 'a3br', 'g']
-            options_to_id = {'by': 0, 'bg': 1, 'a2br': 1, 'a3br': 2, 'g': 0}
         elif tester.experiment == 'officeworld':
             testing_env = MultiAgentOfficeWorldEnv(tester.rm_test_file, tester.env_settings)
             num_states = testing_env.num_states
@@ -474,15 +474,10 @@ def run_strategy_experiment(tester,
         for i in range(num_agents):
             actions = testing_env.get_actions(i)
             options_list = testing_env.get_options_list(i)
-            # if (i == 1 or i == 2) and tester.experiment == 'buttons':
-            #    j = i + 1
-            #    options_list.remove('a{}br'.format(j))
-            #    options_list.append('br')
             s_i = testing_env.get_initial_state(i)
             agent_list.append(StrategyAgent(rm_learning_file_list[i], options_list, actions, s_i, num_states, i))
 
         num_episodes = 0
-        step = 0
 
         # Task loop
         epsilon = learning_params.initial_epsilon
@@ -509,7 +504,8 @@ def run_strategy_experiment(tester,
             s_i = testing_env.get_initial_state(i)
             agent_id = i if tester.experiment == 'buttons' else i + 1
             training_agent_list.append(StrategyAgent(rm_learning_file_list[i], options_list, actions,
-                                                     s_i, num_states, agent_id))
+                                                     s_i, num_states, agent_id,
+                                                     counterfactual_training=counterfactual_experiment))
             if invariant_experiment and i == 2:
                 training_agent_list[i].current_option = options_list[-1]
             elif tester.experiment == 'officeworld':
