@@ -1,0 +1,63 @@
+Semantics=SingleAssignment;
+
+Agent Environment
+	Vars:
+		decoration_hit: boolean;
+		coffee: boolean;
+		deliver_successful: boolean;
+		mail: boolean;
+		 mail: boolean;
+	end Vars
+	Actions = { };
+	Protocol:
+	end Protocol
+	Evolution:
+		decoration_hit=true	if ( Agent0.Action = hit_decoration ) or ( decoration_hit = true and Agent0.Action = nil );
+		decoration_hit=false	if ( decoration_hit = false and Agent0.Action = nil );
+		coffee=true	if ( Agent0.Action = grab_coffee ) or ( coffee = true and Agent0.Action = nil );
+		coffee=false	if ( coffee = false and Agent0.Action = nil );
+		deliver_successful=true	if ( Agent0.Action = deliver ) or ( deliver_successful = true and Agent0.Action = nil );
+		deliver_successful=false	if ( deliver_successful = false and Agent0.Action = nil );
+		mail=true	if ( Agent0.Action = grab_mail ) or ( mail = true and Agent0.Action = nil );
+		mail=false	if ( mail = false and Agent0.Action = nil );
+		 mail=true	if (  mail = true and Agent0.Action = nil );
+		 mail=false	if (  mail = false and Agent0.Action = nil );
+	end Evolution
+end Agent
+
+Agent Agent0
+	Lobsvars = { decoration_hit, coffee, deliver_successful, mail,  mail };
+	Vars:
+		agent_dummy: boolean;
+	end Vars
+	Actions = { grab_coffee, grab_mail, deliver, nil, hit_decoration };
+	Protocol:
+		Environment.coffee = false:	{ grab_coffee };
+		Environment.mail = false:	{ grab_mail };
+		Environment.coffee = true and Environment. mail = true:	{ deliver };
+		agent_dummy = true or agent_dummy = false:	{ nil };
+		Environment.decoration_hit = false:	{ hit_decoration };
+	end Protocol
+	Evolution:
+		agent_dummy = true	if agent_dummy = true;
+		agent_dummy = false	if agent_dummy = false;
+	end Evolution
+end Agent
+
+Evaluation
+	decoration_hit if Environment.decoration_hit = true;
+	deliver_successful if Environment.deliver_successful = true;
+end Evaluation
+
+InitStates
+	Environment.decoration_hit = false and Environment.coffee = false and Environment.deliver_successful = false and Environment.mail = false and Environment. mail = false and
+	Agent0.agent_dummy = false;
+end InitStates
+
+Groups
+	gA = { Agent0 };
+end Groups
+
+Formulae
+	<gA> ( !decoration_hit U deliver_successful ) ;
+end Formulae

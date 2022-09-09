@@ -1,0 +1,27 @@
+::grab_coffee
+~coffee
+coffee
+1
+::grab_mail
+~mail
+mail
+1
+::deliver
+coffee, mail
+deliver_successful
+1
+::nil
+
+
+0
+::hit_decoration
+~decoration_hit
+decoration_hit
+1
+=====
+grab_coffee,grab_mail,deliver,nil,hit_decoration
+=====
+( !decoration_hit U deliver_successful )
+=====
+
+

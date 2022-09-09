@@ -46,7 +46,7 @@ def get_valid_nonvalid_action_tuples(agents_actions: List[List[str]], actions: D
     :param postconditions_dict: Dictionary in which the keys are the actions' names and the values list of strings
     containing the postconditions of the corresponding action.
     :return: A pair of lists of tuples of strings, where the first list is the list of valid action tuples and the
-    second list the list of non-valid action tuples. 
+    second list the list of non-valid action tuples.
     """
 
     agents_needed = {a: int(actions[a][2]) for a in actions.keys()}
@@ -263,7 +263,7 @@ if __name__ == "__main__":
     goals_dict = {}
 
     for element in formula.split(' '):
-        if element not in ['U', 'X', 'F', 'G', 'and', 'or', '!', '(', ')']:
+        if element not in ['U', 'X', 'F', 'G', 'and', 'or', '!', '(', ')', '<gA>']:
             literal = element[1:] if element[0] == '!' else element
             out_ispl += '\t{} if Environment.{} = true;\n'.format(literal, literal)
 
